@@ -76,13 +76,8 @@ public:
     int query(int lowerBound, int upperBound) {
         lowerBound = Utility::max(lowerBound, 0);
         upperBound = Utility::min(upperBound, size - 1);
-        int k;
-        if (lowerBound == upperBound) {
-            k = 0; 
-        } else {
-            k = log2(upperBound - lowerBound);
-        }
-        return op[f](table[k][lowerBound], table[k][upperBound - pow2[k] + 1]);
+        int k = log2(upperBound - lowerBound);
+        return op[f](table[lowerBound][k], table[upperBound - pow2[k]][k]);
     }
     bool save(string fileName) {
         fstream ofs(fileName, ios::out);
@@ -108,7 +103,6 @@ public:
         // Load size, height and init table
         ifs >> size;
         ifs >> height;
-        gen2Pow();
         table = vector<vector<int64>>(height, vector<int64>(size));
         for (auto &row: table)
             for(auto &i: row)
