@@ -9,6 +9,10 @@ using namespace std;
 typedef long long int64;
 typedef int (*operation)(int, int);
 
+string const DATABASE_FOLDERNAME = "data";
+string const COUNT_FILENAME = "count.cnt";
+int const MAX_FILE = 5;
+
 class Utility {
 public:
     static int gcd(int a, int b) {
@@ -34,24 +38,22 @@ operation op[] = {
     Utility::gcd,
 };
 
+void prepare() {
+    string command;
+    command += "mkdir -p ";
+    command += DATABASE_FOLDERNAME;
+    command += "; touch ";
+    command += DATABASE_FOLDERNAME + "/" + COUNT_FILENAME;
+    system(command.c_str());
+}
+
 class SparseTable {
 private:
     int size;
     int height;
     vector<vector<int64>> table;
-    vector<int64> pow2;
     int f;
-
-    void gen2Pow() {
-        // Already generated
-        if(pow2.size() > 0) return;
-
-        int64 temp = 1;
-        for(int i = 0; i < height; i++) {
-            pow2.push_back(temp);
-            temp *= 2;
-        }
-    }
+    
 public:
     void make(const vector<int64> &arr, int f) {
         size = arr.size();
@@ -59,7 +61,6 @@ public:
         // Already make
         if(table.size() > 0)
             return;
-        gen2Pow();
         // Initialize table
         for(int i = 0; i < height; i++) {
             table.push_back(vector<int64>(size));
@@ -68,19 +69,35 @@ public:
         for(int i = 0; i < size; i++)
             table[0][i] = arr[i];
         for(int i = 1; i < height; i++)
-            for(int j = 0; j < size - pow2[i - 1] ; j++)
-                table[i][j] = op[f](table[i - 1][j], table[i - 1][j + pow2[i - 1]]);
+            for(int j = 0; j < size - (1 << (i - 1)) ; j++)
+                table[i][j] = op[f](table[i - 1][j], table[i - 1][j + (1 << (i - 1))]);
         // Saved type
         this->f = f;
     }
     int query(int lowerBound, int upperBound) {
         lowerBound = Utility::max(lowerBound, 0);
-        upperBound = Utility::min(upperBound, size - 1);
+        upperBound = Utility::min(upperBound, size);
+        if(lowerBound == upperBound) {
+            cerr << "Not valid bound!";
+            exit(1);
+        }
         int k = log2(upperBound - lowerBound);
-        return op[f](table[lowerBound][k], table[upperBound - pow2[k]][k]);
+        return op[f](table[k][lowerBound], table[k][upperBound - (1 << k)]);
     }
     bool save(string fileName) {
-        fstream ofs(fileName, ios::out);
+        prepare();
+        fstream countFile(DATABASE_FOLDERNAME + "/" + COUNT_FILENAME, ios::in | ios::out);
+        int count = 0;
+        if(countFile.good()) {
+            countFile >> count;
+            cout << count << endl;
+            if(count == MAX_FILE) {
+                cerr << "Max file exceeded!\n";
+                return false;
+            }
+        }
+        
+        fstream ofs(DATABASE_FOLDERNAME + "/" + fileName, ios::out);
         ofs << f << "\n";
         // Save size of array & table height
         ofs << size << " " << height << "\n";
@@ -91,10 +108,15 @@ public:
             ofs << "\n";
         }
         ofs.close();
+        count++;
+        countFile.clear();
+        countFile.seekg(ios_base::beg);
+        countFile << count;
+        countFile.close();
         return true;
     }
     bool load(string fileName) {
-        fstream ifs(fileName, ios::in);
+        fstream ifs(DATABASE_FOLDERNAME + "/" + fileName, ios::in);
         if(!ifs.is_open()) {
             cerr << "Cannot read file!\n";
             return false;
