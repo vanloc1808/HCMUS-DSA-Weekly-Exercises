@@ -34,7 +34,7 @@ int main(int argc, char** argv) {
         a.push_back(atoi(argv[i]));
     }
 
-    cout << steps << " " << interpolationSearch(a, a.size(), x) << "\n";
+    cout << interpolationSearch(a, a.size(), x) << " - " << steps << "\n";
 
     return 0;
 }
