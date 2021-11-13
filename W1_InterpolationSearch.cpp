@@ -8,6 +8,11 @@ int steps = 0;
 int interpolationSearch(vector<int> a, int n, int x) {
     int l = 0, r = n - 1;
 
+    
+    if (x >a[r] || x < a[l]) {
+        return -1;   
+    }
+
     while(l <= r) {
         steps++;
 
