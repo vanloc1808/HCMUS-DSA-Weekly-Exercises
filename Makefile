@@ -1,5 +1,5 @@
 CXX = g++
-CXXFLAGS = -g -O3
+CXXFLAGS = -g -O3 -std=c++17
 
 BASE_DIR = $(shell pwd)
 OBJ_DIR = obj
