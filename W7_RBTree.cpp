@@ -1,5 +1,6 @@
 //Reference 1: https://www.programiz.com/dsa/insertion-in-a-red-black-tree
-//Reference 2: to be told later, if available
+//Reference 2: https://stackoverflow.com/questions/69748159/calculating-the-black-height-of-a-red-black-tree
+//Reference 3: to be told later, if available
 
 #include <iostream>
 
@@ -168,9 +169,195 @@ void insert(RBNode* &pRoot, int key) {
     inserFixedUp(pRoot, ref);
 }
 
-int main() {
-    RBNode* nil;
+RBNode* createTree(int a[], int n) {
+    RBNode* pRoot = nil;
 
+    for (int i = 0; i < n; i++) {
+        insert(pRoot, a[i]);
+    }
+
+    return pRoot;
+}
+
+RBNode* lookUp(RBNode* pRoot, int key) {
+    RBNode* ans = pRoot;
+
+    while (ans != nil) {
+        if (ans->key == key) {
+            return ans;
+        }
+
+        if (ans->key > key) {
+            ans = ans->left;
+        } else {
+            ans = ans->right;
+        }
+    }
+
+    return nil;
+}
+
+//height here is counted by the maximum number of NODES on paths
+int height(RBNode* pRoot) {
+    if (pRoot == nil) {
+        return 1;
+    } 
+    
+    return std::max(height(pRoot->left), height(pRoot->right)) + 1;
+}
+
+//black height is counted by the number of NODES on paths from the root to the leaves
+int blackHeight(RBNode* pRoot) {
+    if (pRoot == nil) {
+        return 1;
+    }
+
+    int leftBlackHeight = blackHeight(pRoot->left);
+    int rightBlackHeight = blackHeight(pRoot->right);
+
+    if (leftBlackHeight != rightBlackHeight) {
+        return 0;
+    }
+
+    if (pRoot->color == false) {
+        leftBlackHeight++;
+    }
+
+    return leftBlackHeight;
+}
+
+void removeLeftAdjust(RBNode* pRoot, RBNode* ref) {
+    RBNode* p = ref->parent->right;
+
+    if (p->color == true) {
+        p->color = false;
+
+        ref->parent->color = true;
+
+        leftRotate(pRoot, ref->parent);
+
+        p = ref->parent->right;
+    }
+
+    if (p->right->color == false && p->left->color == false) {
+        p->color = true;
+
+        ref = ref->parent;
+    } else {
+        if (p->right->color == false) {
+            p->left->color = false;
+            p->color = true;
+            
+            rightRotate(pRoot, p);
+            p = ref->parent->right;
+        }
+
+        p->color = ref->parent->color;
+
+        ref->parent->color = false;
+
+        p->right->color = false;
+
+        leftRotate(pRoot, ref->parent);
+
+        ref = pRoot;
+    }
+}
+
+void removeRightAdjust(RBNode* pRoot, RBNode* ref) {
+    RBNode* p = ref->parent->left;
+
+    if (p->color == true) {
+        p->color = false;
+
+        ref->parent->color = true;
+
+        rightRotate(pRoot, ref->parent);
+
+        p = ref->parent->left;
+    }
+
+    if (p->left->color == false && p->right->color == false) {
+        p->color = true;
+
+        ref = ref->parent;
+    } else {
+        if (p->left->color == false) {
+            p->right->color = false;
+            p->color = true;
+
+            leftRotate(pRoot, p);
+            p = ref->parent->left;
+        }
+
+        p->color = ref->parent->color;
+
+        ref->parent->color = false;
+
+        p->left->color = false;
+
+        rightRotate(pRoot, ref->parent);
+
+        ref = pRoot;
+    }
+}
+
+void removeFixedUp(RBNode* pRoot, RBNode* ref) {
+    while ((ref->color == false) && (ref != pRoot)) {
+        if (ref == ref->parent->left) {
+            removeLeftAdjust(pRoot, ref);
+        } else {
+            removeRightAdjust(pRoot, ref);
+        }
+    }
+
+    ref->color = false;
+}
+
+RBNode* minimum(RBNode* pRoot, RBNode* ref) {
+    while (ref->left != nil) {
+        ref = ref->left;
+    }
+
+    return ref;
+}
+
+RBNode* maximum(RBNode* pRoot, RBNode* ref) {
+    while (ref->right != nil) {
+        ref = ref->right;
+    }
+
+    return ref;
+}
+
+RBNode* treeSuccessor(RBNode* pRoot, RBNode* ref) {
+    if (ref->right != nil) {
+        return minimum(pRoot, ref->right);
+    }
+
+    RBNode* y = ref->parent;
+
+    while (y != nil && ref == y->right) {
+        ref = y;
+        y = y->parent;
+    }
+
+    return y;
+}
+
+//return 0 if key does not appear in tree, therefore cannot remove
+//return 1 if successfully remove
+int remove(RBNode* pRoot, int key) {
+    RBNode* pFind = lookUp(pRoot, key);
+
+    if (pFind == nil) {
+        return 0;
+    }
+
+
+}
+
+int main() {
     nil = new RBNode;
     nil->color = false;
     nil->parent = nil;
@@ -179,3 +366,5 @@ int main() {
 
     RBNode* root = nil;
 }
+
+//Remember to implement the priority queue using linked list on week 4
