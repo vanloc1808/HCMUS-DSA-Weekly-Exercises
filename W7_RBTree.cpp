@@ -400,5 +400,3 @@ int main() {
 
     RBNode* root = nil;
 }
-
-//Remember to implement the priority queue using linked list on week 4
