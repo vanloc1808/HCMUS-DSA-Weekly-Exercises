@@ -124,8 +124,48 @@ void insertRightAdjust(RBNode* &pRoot, RBNode* ref) {
     }
 }
 
-void insert(RBNode* &pRoot, int key) {
+void inserFixedUp(RBNode*  &pRoot, RBNode* ref) {
+    while (ref->parent->color == true) {
+        if (ref->parent == ref->parent->parent->left) {
+            insertLeftAdjust(pRoot, ref);
+        } else {
+            insertRightAdjust(pRoot, ref);
+        }
+    }
 
+    pRoot->color = false;
+}
+
+void insert(RBNode* &pRoot, int key) {
+    RBNode* ref = getNode(key, true, nil);
+
+    //Binary search tree insertion
+    //-----------------------------------------------------//
+    RBNode* p = pRoot;
+    RBNode* y = nil;
+
+    while (p != nil) {
+        y = p;
+
+        if (ref->key < p->key) {
+            p = p->left;
+        } else {
+            p = p->right;
+        }
+    }
+
+    ref->parent = y;
+
+    if (y == nil) {
+        pRoot = ref;
+    } else if (ref->key < y->key) {
+        y->left = ref;
+    } else {
+        y->right = ref;
+    }
+    //-----------------------------------------------------//
+
+    inserFixedUp(pRoot, ref);
 }
 
 int main() {
