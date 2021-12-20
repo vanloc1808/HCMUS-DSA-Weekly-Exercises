@@ -1,13 +1,48 @@
 #include <algorithm>
+#include <cassert>
 #include <fstream>
 #include <iostream>
 #include <queue>
 #include <stack>
+#include <unordered_map>
 #include <utility>
 #include <vector>
 using namespace std;
 
 enum class Type { Normal, Complete, Circular, Bigraph, ComBigraph };
+
+struct DisjointSet {
+  vector<int> parent;
+  vector<int> rank;
+
+  void init(int size) {
+    parent.resize(size);
+    rank.resize(size);
+    for (int i = 0; i < size; i++) {
+      parent[i] = i;
+      rank[i] = 0;
+    }
+  }
+
+  int findRoot(int x) {
+    if (parent[x] == x) return x;
+    return parent[x] = findRoot(parent[x]);
+  }
+
+  bool isSameSet(int u, int v) { return findRoot(u) == findRoot(v); }
+
+  void unionSet(int u, int v) {
+    if (isSameSet(u, v)) return;
+    int x = findRoot(u);
+    int y = findRoot(v);
+    if (rank[x] > rank[y]) {
+      parent[y] = x;
+    } else {
+      parent[x] = y;
+      if (rank[x] == rank[y]) rank[y]++;
+    }
+  }
+};
 
 class Graph {
  private:
@@ -324,7 +359,41 @@ class Graph {
     return Type::Normal;
   }
 
+  pair<int, int> countConnectedComponentAndTree() {
+    assert(checkUndirected() == true);  // Only undirected graph
+    int connectedCount = 0;
+    int treeCount = 0;
 
+    int n = getVertices();
+    vector<bool> visited(n, false);
+    // Using disjoint set - union
+    DisjointSet ds;
+    ds.init(n);
+    if (mode) {  // List
+      for (int i = 0; i < n; i++)
+        for (auto& j : data[i]) ds.unionSet(i, j);
+    } else {  // Matrix
+      for (int i = 0; i < n; i++)
+        for (int j = 0; j < n; j++)
+          if (data[i][j] > 0) ds.unionSet(i, j);
+    }
+    unordered_map<int, vector<int>> m;
+    for (int i = 0; i < n; i++) m[ds.findRoot(i)].push_back(i);
+    connectedCount = m.size();
+    // Find tree by theorem: |E| = |V| - 1, |E| = 1/2 E(deg(v)) -> ...
+    auto [in, out] = getDegree();
+    for (auto& [k, v] : m) {
+      // Calc E(deg(v))
+      int totalDeg = 0;
+      for (auto& x : v) {
+        totalDeg += in[x];
+      }
+      if (v.size() - 1 == totalDeg / 2) treeCount++;
+    }
+    return {connectedCount, treeCount};
+  }
+  // Aka articulation point
+  int countCutVertices() {}
 };
 
 int main() { return 0; }
