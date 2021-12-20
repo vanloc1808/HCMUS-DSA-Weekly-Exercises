@@ -354,7 +354,41 @@ int remove(RBNode* pRoot, int key) {
         return 0;
     }
 
+    RBNode* y;
+    if (pFind->left == nil || pFind->right == nil) {
+        y = pFind;
+    } else {
+        y = treeSuccessor(pRoot, pFind);
+    }
+    
+    RBNode* x;
+    if (y->left != nil) {
+        x = y->left;
+    } else {
+        x = y->right;
+    }
 
+    if (x != nil) {
+        x->parent = y->parent;
+    }
+
+    if (y->parent == nil) {
+        pRoot = x;
+    } else if (y == y->parent->left) {
+        y->parent->left = x;
+    } else {
+        y->parent->right = x;
+    }
+
+    if (y != pFind) {
+        pFind->key = y->key;
+    }
+
+    if (y->color == false) {
+        removeFixedUp(pRoot, x);
+    }
+
+    delete y;
 }
 
 int main() {
