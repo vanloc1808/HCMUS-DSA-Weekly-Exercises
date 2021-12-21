@@ -8,6 +8,7 @@
 #include <vector>
 #include <sstream>
 #include <queue>
+#include <climits>
 
 using namespace std;
 
@@ -66,6 +67,10 @@ public:
     void dfs(int vertex, vector<bool>& visited, vector<int> verticesList); //depth-first search
 
     pair<int, int> getConnectedComponentsNumberAndHowManyTrees(); //get the number of connected components in the graph
+
+    void cutVerticesUlti(int vertex, vector<bool>& visited, vector<int>& discoveryTimes, vector<int>& lowTimes, int& time, int parent, vector<bool>& isCV);
+    
+    int getCutVerticesNumber(); //get the number of cut vertices in the graph (aka articulation points)
 };
 
 #endif // _GRAPH2_H_

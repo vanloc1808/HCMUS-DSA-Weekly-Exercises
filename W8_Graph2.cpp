@@ -459,3 +459,73 @@ pair<int, int> Graph::getConnectedComponentsNumberAndHowManyTrees() {
     return make_pair(count, treeCount);
 }
 
+//this is a recursive function,
+//used to find cut vertices (aka articulation points) using DFS traversal.
+//vertex: the next vertex to be visited
+//visited: keeps track of visited vertices
+//discorveryTimes: stores discovery times of visited vertices
+//lowTimes: stores earliest visited vertex (the vertex with minimum discovery time)
+//that can be reached from sub-tree rooted with current vertex
+//parent: stores the parent vertex in DFS tree
+//isCV: stores the cut vertices
+//https://www.geeksforgeeks.org/articulation-points-or-cut-vertices-in-a-graph/
+void Graph::cutVerticesUlti(int vertex, vector<bool>& visited, vector<int>& discoveryTimes, vector<int>& lowTimes, int& time, int parent, vector<bool>& isCV) {
+    //count the number of children in DFS tree
+    int children = 0;
+
+    visited[vertex] = true;
+
+    discoveryTimes[vertex] = lowTimes[vertex] = ++time;
+
+    for (auto v: adjacencyList[vertex]) {
+        if (visited[v] == false) {
+            children++;
+
+            cutVerticesUlti(v, visited, discoveryTimes, lowTimes, time, vertex, isCV);
+
+            //check if the subtree rooted with v has a connection to one of the ancestors of vertex
+            lowTimes[vertex] = min(lowTimes[vertex], lowTimes[v]);
+
+            //check if vertex is not root and low value of one of its child 
+            //is more than discovery value of vertex
+            if (parent != -1 && lowTimes[v] >= discoveryTimes[vertex]) {
+                isCV[vertex] = true;
+            }
+        } else if (v != parent) {
+            //update the low value of vertex by taking the minimum of the current low value and the discovery value of the visited vertex
+            lowTimes[vertex] = min(lowTimes[vertex], discoveryTimes[v]);
+        }
+    }
+
+    //if vertex is root of DFS tree and it has more than one child
+    //then it is a cut vertex
+    if (parent == -1 && children > 1) {
+        isCV[vertex] = true;
+    }
+}
+
+int Graph::getCutVerticesNumber() {
+    int verticeNumber = getVerticesNumber();
+
+    vector<int> discoverTimes(verticeNumber, 0);
+    vector<int> lowTimes(verticeNumber, INT_MAX);
+    vector<bool> isCutVertex(verticeNumber, false);
+    vector<bool> visited(verticeNumber, false);
+    int time = 0, parent = -1;
+
+    //add this loop so that the code works even if the graph is not connected
+    for (int i = 0; i < verticeNumber; i++) {
+        if (visited[i] == false) {
+            cutVerticesUlti(i, visited, discoverTimes, lowTimes, time, parent, isCutVertex);
+        }
+    }
+
+    int cutVerticeNumber = 0;
+    for (int i = 0; i < verticeNumber; i++) {
+        if (isCutVertex[i] == true) {
+            cutVerticeNumber++;
+        }
+    }
+
+    return cutVerticeNumber;
+}
