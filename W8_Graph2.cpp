@@ -399,3 +399,63 @@ bool Graph::isCompleteBiPartite() {
 
     return true;
 }
+
+void Graph::dfs(int vertex, vector<bool>& visited, vector<int> verticesList) {
+    visited[vertex] = true;
+    verticesList.push_back(vertex);
+
+    for (int i = 0; i < adjacencyMatrix[vertex].size(); i++) {
+        if (adjacencyMatrix[vertex][i] == 1 && visited[i] == false) {
+            dfs(i, visited, verticesList);
+        }
+    }
+}
+
+pair<int, int> Graph::getConnectedComponentsNumberAndHowManyTrees() {
+    vector<bool> visited;
+    for (int i = 0; i < getVerticesNumber(); i++) {
+        visited.push_back(false);
+    }
+
+    int count = 0;
+    int treeCount = 0;
+
+    for (int i = 0; i < getVerticesNumber(); i++) {
+        if (visited[i] == false) {
+            vector<int> verticesList;
+            dfs(i, visited, verticesList);
+            count++;
+
+            int totalDegree;
+            if (isDirectedOrUndirected()) {
+                vector<int> degree = degrees();
+                
+                totalDegree = 0;
+
+                for (int j = 0; j < verticesList.size(); j++) {
+                    totalDegree += degree[verticesList[j]];
+                }
+
+                if (verticesList.size() == totalDegree / 2 - 1) {
+                    treeCount++;
+                }
+            } else {
+                vector<int> inDegree = inDegrees();
+                vector<int> outDegree = outDegrees();
+
+                totalDegree = 0;
+
+                for (int j = 0; j < verticesList.size(); j++) {
+                    totalDegree += inDegree[verticesList[j]] + outDegree[verticesList[j]];
+                }
+
+                if (verticesList.size() == totalDegree / 2 - 1) {
+                    treeCount++;
+                }
+            }
+        }
+    }
+
+    return make_pair(count, treeCount);
+}
+

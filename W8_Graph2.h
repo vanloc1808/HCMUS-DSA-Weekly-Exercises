@@ -62,6 +62,10 @@ public:
     bool isBipartite(); //check if the graph is bipartite (two-colorable)
 
     bool isCompleteBiPartite(); //check if the graph is complete bipartite (two-colorable)
+
+    void dfs(int vertex, vector<bool>& visited, vector<int> verticesList); //depth-first search
+
+    pair<int, int> getConnectedComponentsNumberAndHowManyTrees(); //get the number of connected components in the graph
 };
 
 #endif // _GRAPH2_H_
