@@ -169,3 +169,233 @@ int Graph::getVerticesNumber() {
 
     return ans;
  }
+
+ vector<int> Graph::inDegrees() {
+    vector<int> ans;
+
+    for (int i = 0; i < adjacencyMatrix.size(); i++) {
+        int degree = 0;
+
+        for (int j = 0; j < adjacencyMatrix[i].size(); j++) {
+            if (adjacencyMatrix[j][i] == 1) {
+                degree++;
+            }
+        }
+
+        ans.push_back(degree);
+    }
+
+    return ans;
+ }
+
+ vector<int> Graph::outDegrees() {
+    vector<int> ans;
+
+    for (int i = 0; i < adjacencyMatrix.size(); i++) {
+        int degree = 0;
+
+        for (int j = 0; j < adjacencyMatrix[i].size(); j++) {
+            if (adjacencyMatrix[i][j] == 1) {
+                degree++;
+            }
+        }
+
+        ans.push_back(degree);
+    }
+
+    return ans;
+ }
+
+ vector<int> Graph::isolatedVertices() {
+     vector<int> ans;
+
+    if (isDirectedOrUndirected()) {
+        vector<int> degree = degrees();
+
+        for (int i = 0; i < degree.size(); i++) {
+            if (degree[i] == 0) {
+                ans.push_back(i);
+            }
+        }
+    } else {
+        vector<int> inDegree = inDegrees();
+        vector<int> outDegree = outDegrees();
+
+        for (int i = 0; i < inDegree.size(); i++) {
+            if (inDegree[i] + outDegree[i] == 0) {
+                ans.push_back(i);
+            }
+        }
+    }
+
+     return ans;
+}
+
+vector<int> Graph::getLeafVertices() {
+    vector<int> ans;
+
+    if (isDirectedOrUndirected()) {
+        vector<int> degree = degrees();
+
+        for (int i = 0; i < degree.size(); i++) {
+            if (degree[i] == 1) {
+                ans.push_back(i);
+            }
+        }
+    } else {
+        vector<int> inDegree = inDegrees();
+        vector<int> outDegree = outDegrees();
+
+        for (int i = 0; i < inDegree.size(); i++) {
+            if (inDegree[i] + outDegree[i] == 1) {
+                ans.push_back(i);
+            }
+        }
+    }
+
+    return ans;
+} 
+
+bool Graph::isCompleteGraph() {
+    if (isDirectedOrUndirected()) {
+        vector<int> degree = degrees();
+
+        for (int i = 0; i < degree.size(); i++) {
+            if (degree[i] != degree.size() - 1) {
+                return false;
+            }
+        }
+
+        return true;
+    } else {
+        vector<int> inDegree = inDegrees();
+        vector<int> outDegree = outDegrees();
+
+        for (int i = 0; i < inDegree.size(); i++) {
+            if (inDegree[i] + outDegree[i] != inDegree.size() - 1) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+}
+
+bool Graph::isCircularGraph() {
+    if (isDirectedOrUndirected()) {
+        //with an undirected graph, the graph is circular if it has no leaf or isolated vertice.
+        vector<int> degree = degrees();
+
+        for (int i = 0; i < degree.size(); i++) {
+            if (degree[i] <= 1) {
+                return false;
+            }
+        }
+        
+        return true;
+    } else {
+        //with an undirected graph, the graph is circular if every vertex has an in degree of 1 and an out degree of 1.
+        vector<int> inDegree = inDegrees();
+        vector<int> outDegree = outDegrees();
+
+        for (int i = 0; i < inDegree.size(); i++) {
+            if (inDegree[i] == 0 && outDegree[i] == 0) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+}
+
+//https://www.sanfoundry.com/cpp-program-check-bipartite-graph/
+bool Graph::isBipartite() {
+    vector<int> color(getVerticesNumber(), -1);
+
+    queue<int> q;
+
+    q.push(0);
+    color[0] = 1;
+
+    while (q.empty() == false) {
+        int u = q.front();
+        q.pop();
+
+        for (int i = 0; i < adjacencyMatrix[u].size(); i++) {
+            if (adjacencyMatrix[u][i] == 1) {
+                if (color[i] == -1) {
+                    color[i] = 1 - color[u];
+                    q.push(i);
+                } else if (color[i] == color[u]) {
+                    return false;
+                }
+            }
+        }
+    }
+
+    return true;
+}
+
+bool Graph::isCompleteBiPartite() {
+    vector<int> color(getVerticesNumber(), -1);
+
+    queue<int> q;
+
+    q.push(0);
+    color[0] = 1;
+
+    while (q.empty() == false) {
+        int u = q.front();
+        q.pop();
+
+        for (int i = 0; i < adjacencyMatrix[u].size(); i++) {
+            if (adjacencyMatrix[u][i] == 1) {
+                if (color[i] == -1) {
+                    color[i] = 1 - color[u];
+                    q.push(i);
+                } else if (color[i] == color[u]) {
+                    return false;
+                }
+            }
+        }
+    }
+
+    int firstColor = 0, secondColor = 0;
+    for (int i = 0; i < getVerticesNumber(); i++) {
+        if (color[i] == 1) {
+            firstColor++;
+        } else {
+            secondColor++;
+        }
+    }
+
+    vector<int> degree = degrees();
+
+    for (int i = 0; i < getVerticesNumber(); i++) {
+        if (color[i] == -1) {
+            return false;
+        }
+
+        if (color[i] == 1) {
+            if (degree[i] != secondColor) {
+                return false;
+            }
+        } else {
+            if (degree[i] != firstColor) {
+                return false;
+            }
+        }
+    }
+
+    for (int i = 0; i < adjacencyMatrix.size(); i++) {
+        for (int j = 0; j < adjacencyMatrix[i].size(); j++) {
+            if (adjacencyMatrix[i][j] == 1) {
+                if (color[i] == color[j]) {
+                    return false;
+                }
+            }
+        }
+    }
+
+    return true;
+}
