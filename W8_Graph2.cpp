@@ -529,3 +529,165 @@ int Graph::getCutVerticesNumber() {
 
     return cutVerticeNumber;
 }
+
+//a recursive function that find bridges using DFS traversal
+//vertex: the next vertex to be visited
+//visited: keeps track of visited vertices
+//discorveryTimes: stores discovery times of visited vertices
+//lowTimes: stores earliest visited vertex (the vertex with minimum discovery time)
+//that can be reached from sub-tree rooted with current vertex
+//parent: stores parent vertices in DFS tree
+//https://www.geeksforgeeks.org/bridge-in-a-graph/
+void Graph::bridgeUtil(int vertex, vector<bool>& visited, vector<int>& discoveryTimes, vector<int>& lowTimes, vector<int>& parent, vector<Edge>& bridges) {
+    //a static variable is used for simplicity, 
+    //we can avoid use of static variable by passing a pointer
+    static int time = 0;
+
+    visited[vertex] = true;
+
+    discoveryTimes[vertex] = lowTimes[vertex] = ++time;
+
+    //go through all the vertices adjacent to this vertex
+    vector<int>::iterator i;
+
+    for (i = adjacencyList[vertex].begin(); i != adjacencyList[vertex].end(); i++) {
+        int v = *i; //v is the current neighbor of vertex
+
+        //if v is not visited yet, then use the recursion for it
+        if (visited[v] == false) {
+            parent[v] = vertex;
+
+            bridgeUtil(v, visited, discoveryTimes, lowTimes, parent, bridges);
+
+            //check if the sub-tree rooted with v has a connection to one of the ancestors of vertex
+            lowTimes[vertex] = min(lowTimes[vertex], lowTimes[v]);
+
+            //if the lowest vertex reachable from subtree rooted with v is below v, then vertex-v is a bridge
+            if (lowTimes[v] > discoveryTimes[vertex]) {
+                //this is a bridge
+                //add the edge (vertex, v) to the list of bridges
+                bridges.push_back(Edge(vertex, v));
+            }
+        } else if (v != parent[vertex]) {
+            //update the low value of vertex by taking the minimum of the current low value and the discovery value of the visited vertex
+            lowTimes[vertex] = min(lowTimes[vertex], discoveryTimes[v]);
+        }
+    }
+}
+
+//dfs based to find bridges, used the bridgeUtil function
+int Graph::getBridgesNumber() {
+    int verticeNumber = getVerticesNumber();
+
+    vector<bool> visited;
+    vector<int> discoveryTimes;
+    vector<int> lowTimes;
+    vector<int> parent;
+    
+    for (int i = 0; i < verticeNumber; i++) {
+        visited.push_back(false);
+        discoveryTimes.push_back(0);
+        lowTimes.push_back(0);
+        parent.push_back(0);
+    }
+
+    vector<Edge> bridges;
+
+    for (int i = 0; i < verticeNumber; i++) {
+        if (visited[i] == false) {
+            bridgeUtil(i, visited, discoveryTimes, lowTimes, parent, bridges);
+        }
+    }
+
+    return bridges.size();
+}
+
+Graph Graph::baseUndirectedGraph() {
+    if (isDirectedOrUndirected()) {
+        return *this;
+    }
+
+    int n = getVerticesNumber();
+
+    vector<vector<int>> AM;
+    AM.resize(n);
+    for (int i = 0; i < n; i++) {
+        AM[i].resize(n);
+    }
+
+    vector<vector<int>> AL;
+    AL.resize(n);
+
+    for (int i = 0; i < adjacencyMatrix.size(); i++) {
+        for (int j = 0; j < adjacencyMatrix[i].size(); j++) {
+            if (adjacencyMatrix[i][j] == 1) {
+                AL[i].push_back(j);
+                AL[j].push_back(i);
+
+                AM[i][j] = 1;
+                AM[j][i] = 1;
+            }
+        }
+    }
+
+    Graph ans;
+    ans.adjacencyList = AL;
+    ans.adjacencyMatrix = AM;
+
+    return ans;
+}
+
+vector<vector<int>> Graph::getComplementGraph() {
+    vector<vector<int>> ans;
+
+    if (isDirectedOrUndirected() == false) {
+        return ans;
+    }
+
+    int n = getVerticesNumber();
+    ans.resize(n);
+    for (int i = 0; i < n; i++) {
+        ans[i].resize(n);
+    }
+
+    for (int i = 0; i < adjacencyMatrix.size(); i++) {
+        for (int j = 0; j < adjacencyMatrix[i].size(); j++) {
+            if (adjacencyMatrix[i][j] == 1) {
+                ans[i][j] = 0;
+                ans[j][i] = 0;
+            } else {
+                ans[i][j] = 1;
+                ans[j][i] = 1;
+            }
+        }
+    }
+
+    return ans;
+}
+
+vector<vector<int>> Graph::getConverseGraph() {
+    vector<vector<int>> ans;
+
+    if (isDirectedOrUndirected() == true) {
+        return ans;
+    }
+
+    int n = getVerticesNumber();
+
+    ans.resize(n);
+    for (int i = 0; i < n; i++) {
+        ans[i].resize(n);
+    }
+
+    for (int i = 0; i < adjacencyMatrix.size(); i++) {
+        for (int j = 0; j < adjacencyMatrix[i].size(); j++) {
+            if (adjacencyMatrix[i][j] == 1) {
+                ans[i][j] = 0;
+            } else {
+                ans[i][j] = 1;
+            }
+        }
+    }
+
+    return ans;
+}

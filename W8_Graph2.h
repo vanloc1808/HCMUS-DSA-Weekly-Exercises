@@ -9,6 +9,7 @@
 #include <sstream>
 #include <queue>
 #include <climits>
+#include <list>
 
 using namespace std;
 
@@ -71,6 +72,16 @@ public:
     void cutVerticesUlti(int vertex, vector<bool>& visited, vector<int>& discoveryTimes, vector<int>& lowTimes, int& time, int parent, vector<bool>& isCV);
     
     int getCutVerticesNumber(); //get the number of cut vertices in the graph (aka articulation points)
+
+    void bridgeUtil(int vertex, vector<bool>& visited, vector<int>& discoveryTimes, vector<int>& lowTimes, vector<int>& parent, vector<Edge>& bridges);
+
+    int getBridgesNumber(); //get the number of bridges in the graph
+
+    Graph baseUndirectedGraph(); //use for directed graphs only, if the graph is already undirected, this will return itself
+
+    vector<vector<int>> getComplementGraph(); //get the adjacency matrix of the complement graph of this graph (undirected graphs only)
+
+    vector<vector<int>> getConverseGraph(); //get the adjacency matrix of the converse graph of this graph (directed graphs only)
 };
 
 #endif // _GRAPH2_H_
