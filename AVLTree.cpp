@@ -1,5 +1,6 @@
 #include <iostream>
 #include <stack>
+#include <queue>
 
 using namespace std;
 
@@ -262,4 +263,62 @@ void LRN(Node* pRoot) {
         s.push(p);
         p = p->right;
     }
+}
+
+//Level-order traversal
+void levelOrder(Node* pRoot) {
+    if (pRoot == NULL) {
+        return;
+    }
+
+    queue<Node*> q;
+
+    q.push(pRoot);
+
+    while (q.empty() == false) {
+        Node* p = q.front();
+        q.pop();
+
+        cout << p->key << " ";
+
+        if (p->left != NULL) {
+            q.push(p->left);
+        }
+
+        if (p->right != NULL) {
+            q.push(p->right);
+        }
+    }
+}
+
+Node* search(Node* pRoot, int x) {
+    if (pRoot == NULL) {
+        return NULL;
+    }
+
+    if (pRoot->key == x) {
+        return pRoot;
+    }
+
+    if (x < pRoot->key) {
+        return search(pRoot->left, x);
+    } else {
+        return search(pRoot->right, x);
+    }
+}
+
+int countNode(Node* pRoot) {
+    if (pRoot == NULL) {
+        return 0;
+    }
+
+    return 1 + countNode(pRoot->left) + countNode(pRoot->right);
+}
+
+int sumNode(Node* pRoot) {
+    if (pRoot == NULL) {
+        return 0;
+    }
+
+    return pRoot->key + sumNode(pRoot->left) + sumNode(pRoot->right);
 }
