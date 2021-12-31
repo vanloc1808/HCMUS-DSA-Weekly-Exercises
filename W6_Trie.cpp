@@ -95,8 +95,8 @@ void Remove(TrieNode*& t, std::string const& s) {
 int main() {
   TrieNode* t = nullptr;
 
-  createTrie(t, "../HW6-dic.txt");
-  std::vector<std::string> result = lookUpPrefix(t, "mis");
+  createTrie(t, "HW6-dic.txt");
+  std::vector<std::string> result = lookUpPrefix(t, "over");
   for (auto const& s : result) {
     std::cout << s << "\n";
   }
