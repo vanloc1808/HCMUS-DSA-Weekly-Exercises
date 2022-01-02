@@ -76,6 +76,10 @@ PQNode* extract(PQNode* &head, PQNode* &tail) {
     PQNode* p = head;
     head = head->next;
 
+    for (PQNode* cur = head; cur != nullptr; cur = cur->next) {
+        cur->order--;
+    }
+
     if (head == nullptr) {
         tail = nullptr;
     }
@@ -106,6 +110,10 @@ void remove(PQNode* &head, PQNode* &tail, string ID) {
         tail = prev;
     }
 
+    for (PQNode* p = cur->next; p != nullptr; p = p->next) {
+        p->order--;
+    }
+
     delete cur;
 }
 
@@ -125,8 +133,13 @@ int main() {
     insert(head, tail, "D", 3);
     insert(head, tail, "E", 0);
 
-    while (head != nullptr) {
-        PQNode* p = extract(head, tail);
+    for (PQNode* p = head; p != nullptr; p = p->next) {
+        std::cout << p->id << " " << p->priority << " " << p->order << "\n";
+    }
+
+    remove(head, tail, "B");
+
+    for (PQNode* p = head; p != nullptr; p = p->next) {
         std::cout << p->id << " " << p->priority << " " << p->order << "\n";
     }
 
