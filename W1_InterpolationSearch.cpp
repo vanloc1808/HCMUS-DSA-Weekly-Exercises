@@ -19,7 +19,7 @@ int interpolationSearch(vector<int> a, int n, int x) {
         int pivot = (1.0 * (x - a[l]) * (r - l)) / (a[r] - a[l]) + l;
 
         if (a[pivot] == x) {
-            return pivot;
+            return pivot + 1; // One based
         }
 
         if (a[pivot] > x) {
